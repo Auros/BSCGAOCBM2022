@@ -1,2 +1,5 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿
+using BenchmarkDotNet.Running;
+using BSCGAOCBM2022;
+
+BenchmarkRunner.Run<Day1Benchmarks>();
