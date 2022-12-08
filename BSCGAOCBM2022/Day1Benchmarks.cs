@@ -7,12 +7,14 @@ public class Day1Benchmarks
 {
     private string _inputText = null!;
     private string[] _inputLines = null!;
+    private IEnumerable<string> _inputEnumerable = null!;
 
     [GlobalSetup]
     public void Setup()
     {
         _inputText = File.ReadAllText(@"Input\1.txt");
         _inputLines = File.ReadAllLines(@"Input\1.txt");
+        _inputEnumerable = _inputLines.AsEnumerable();
     }
 
     [Benchmark]
@@ -142,18 +144,18 @@ public class Day1Benchmarks
 
     private IEnumerable<uint> Eris_ParseCaloriesData()
     {
-        var caloriesList = new List<uint> { 0 };
-        foreach (var calorieRaw in _inputLines)
+        var currentCalories = 0u;
+        foreach (var calorieRaw in _inputEnumerable)
         {
             if (string.IsNullOrWhiteSpace(calorieRaw))
             {
-                caloriesList.Add(0);
+                yield return currentCalories;
+                currentCalories = 0;
             }
             else
             {
-                caloriesList[^1] += uint.Parse(calorieRaw);
+                currentCalories += uint.Parse(calorieRaw);
             }
         }
-        return caloriesList;
     }
 }
