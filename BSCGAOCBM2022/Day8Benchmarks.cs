@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
+using System.Runtime.CompilerServices;
 
 namespace BSCGAOCBM2022;
 
@@ -16,6 +17,7 @@ public class Day8Benchmarks
         _inputLines = File.ReadAllLines(@"Input\8.txt");
         _inputEnumerable = _inputLines.AsEnumerable();
     }
+
     readonly record struct Auros_Coordinate(int X, int Y);
 
     [Benchmark]
@@ -172,9 +174,9 @@ public class Day8Benchmarks
     }
 
     [Benchmark]
-    public int Eris_Part1()
+    public int Eris_Part1_Sol1()
     {
-        var treeHeightMap = Eris_ParseTreeHeightMap();
+        var treeHeightMap = Eris_ParseTreeHeightMap_Sol1();
 
         var forestHeight = treeHeightMap.Length;
         var forestWidth = treeHeightMap[0].Length;
@@ -183,7 +185,7 @@ public class Day8Benchmarks
         for (var y = 0; y < forestHeight; y++)
             for (var x = 0; x < forestWidth; x++)
             {
-                if (Eris_CheckTreeVisible(treeHeightMap, x, y))
+                if (Eris_CheckTreeVisible_Sol1(treeHeightMap, x, y))
                 {
                     visibleTreeCount++;
                 }
@@ -193,9 +195,9 @@ public class Day8Benchmarks
     }
 
     [Benchmark]
-    public int Eris_Part2()
+    public int Eris_Part2_Sol1()
     {
-        var treeHeightMap = Eris_ParseTreeHeightMap();
+        var treeHeightMap = Eris_ParseTreeHeightMap_Sol1();
 
         IEnumerable<int> ScenicScoreEnumerator()
         {
@@ -205,42 +207,42 @@ public class Day8Benchmarks
             for (var x = 2; x < forestWidth; x++)
                 for (var y = 3; y < forestHeight; y++)
                 {
-                    yield return Eris_CalculateScenicScore(treeHeightMap, x, y);
+                    yield return Eris_CalculateScenicScore_Sol1(treeHeightMap, x, y);
                 }
         }
 
         return ScenicScoreEnumerator().Max();
     }
 
-    private int[][] Eris_ParseTreeHeightMap()
+    private int[][] Eris_ParseTreeHeightMap_Sol1()
     {
         return _inputEnumerable
             .Select(treeLine => treeLine.Select(treeHeight => (int)char.GetNumericValue(treeHeight)).ToArray())
             .ToArray();
     }
 
-    private static bool Eris_CheckTreeVisible(int[][] treeHeightMap, int x, int y)
+    private static bool Eris_CheckTreeVisible_Sol1(int[][] treeHeightMap, int x, int y)
     {
         var visible = false;
 
         var treeRow = treeHeightMap[y];
         // Check if numbers to the left are lower than the number from current position
-        visible |= Eris_CheckTreeVisibilityInDirection(treeRow, x, -1);
+        visible |= Eris_CheckTreeVisibilityInDirection_Sol1(treeRow, x, -1);
 
         // Check if numbers to the right are lower than the number from current position
-        visible |= Eris_CheckTreeVisibilityInDirection(treeRow, x, 1);
+        visible |= Eris_CheckTreeVisibilityInDirection_Sol1(treeRow, x, 1);
 
         var treeColumn = treeHeightMap.Select(line => line[x]).ToArray();
         // Check if numbers to the top are lower than the number from current position
-        visible |= Eris_CheckTreeVisibilityInDirection(treeColumn, y, -1);
+        visible |= Eris_CheckTreeVisibilityInDirection_Sol1(treeColumn, y, -1);
 
         // Check if numbers to the bottom are lower than the number from current position
-        visible |= Eris_CheckTreeVisibilityInDirection(treeColumn, y, 1);
+        visible |= Eris_CheckTreeVisibilityInDirection_Sol1(treeColumn, y, 1);
 
         return visible;
     }
 
-    private static bool Eris_CheckTreeVisibilityInDirection(int[] treeHeightsForOrientation, int index, int direction)
+    private static bool Eris_CheckTreeVisibilityInDirection_Sol1(int[] treeHeightsForOrientation, int index, int direction)
     {
         var heightThreshold = treeHeightsForOrientation[index];
         index += direction;
@@ -266,28 +268,28 @@ public class Day8Benchmarks
         return true;
     }
 
-    private static int Eris_CalculateScenicScore(int[][] treeHeightMap, int x, int y)
+    private static int Eris_CalculateScenicScore_Sol1(int[][] treeHeightMap, int x, int y)
     {
         var scenicScore = 1;
 
         var treeRow = treeHeightMap[y];
         // Calculate scenic score for trees to the left of the current position
-        scenicScore *= Eris_CalculateScenicScoreInDirection(treeRow, x, -1);
+        scenicScore *= Eris_CalculateScenicScoreInDirection_Sol1(treeRow, x, -1);
 
         // Calculate scenic score for trees to the right of the current position
-        scenicScore *= Eris_CalculateScenicScoreInDirection(treeRow, x, 1);
+        scenicScore *= Eris_CalculateScenicScoreInDirection_Sol1(treeRow, x, 1);
 
         var treeColumn = treeHeightMap.Select(line => line[x]).ToArray();
         // Calculate scenic score for trees above the current position
-        scenicScore *= Eris_CalculateScenicScoreInDirection(treeColumn, y, -1);
+        scenicScore *= Eris_CalculateScenicScoreInDirection_Sol1(treeColumn, y, -1);
 
         // Calculate scenic score for trees below the current position
-        scenicScore *= Eris_CalculateScenicScoreInDirection(treeColumn, y, 1);
+        scenicScore *= Eris_CalculateScenicScoreInDirection_Sol1(treeColumn, y, 1);
 
         return scenicScore;
     }
 
-    private static int Eris_CalculateScenicScoreInDirection(int[] treeHeightsForOrientation, int index, int direction)
+    private static int Eris_CalculateScenicScoreInDirection_Sol1(int[] treeHeightsForOrientation, int index, int direction)
     {
         var heightThreshold = treeHeightsForOrientation[index];
         index += direction;
