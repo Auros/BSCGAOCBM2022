@@ -437,15 +437,15 @@ public class Day7Benchmarks
 
     private class Eris_FileObject : Eris_IFileSystemObject
     {
-        public string Name { get; init; }
+        public string Name { get; init; } = null!;
         public long Size { get; init; }
     }
 
     private class Eris_FolderObject : Eris_IFileSystemObject
     {
-        public string Name { get; init; }
+        public string Name { get; init; } = null!;
         public long Size => ChildObjects.Sum(x => x.Size);
-        public Eris_FolderObject Parent { get; init; }
+        public Eris_FolderObject Parent { get; init; } = null!;
         public List<Eris_IFileSystemObject> ChildObjects { get; } = new();
     }
 
