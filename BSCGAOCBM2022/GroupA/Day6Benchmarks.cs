@@ -1,36 +1,29 @@
 ﻿using BenchmarkDotNet.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BenchmarkDotNet.Configs;
 
-namespace BSCGAOCBM2022;
+namespace BSCGAOCBM2022.GroupA;
 
 [MemoryDiagnoser]
+[CategoriesColumn]
+[Config(typeof(CustomConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 public class Day6Benchmarks
 {
-    private string _inputText = null!;
-    private string[] _inputLines = null!;
-    private MemoryStream _inputStream = null!;
-    private IEnumerable<string> _inputEnumerable = null!;
+    private Input _input = null!;
 
     [GlobalSetup]
-    public void Setup()
-    {
-        _inputText = File.ReadAllText(@"Input\6.txt");
-        _inputLines = File.ReadAllLines(@"Input\6.txt");
-        _inputEnumerable = _inputLines.AsEnumerable();
-        _inputStream = new MemoryStream(Encoding.UTF8.GetBytes(_inputText));
-    }
+    public void Setup() => _input = Helpers.GetInput(6);
 
-    [Benchmark]
+    #region Auros
+
+    [Benchmark(Baseline = Helpers.AurosIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int? Auros_Part1()
     {
         int? GetMarker(char[] buffer)
         {
             int? index = null;
-            for (int i = 0; i < _inputText.Length - buffer.Length; i++)
+            for (int i = 0; i < _input.Text.Length - buffer.Length; i++)
             {
                 if (buffer.Distinct().Count() == buffer.Length)
                 {
@@ -39,23 +32,24 @@ public class Day6Benchmarks
                 }
 
                 for (int c = 0; c < buffer.Length; c++)
-                    buffer[c] = _inputText[i + c + 1];
+                    buffer[c] = _input.Text[i + c + 1];
             }
             return index;
         }
 
-        char[] buffer = _inputText.Take(4).ToArray();
+        char[] buffer = _input.Text.Take(4).ToArray();
         int? index = GetMarker(buffer);
         return index;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.AurosIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public int? Auros_Part2()
     {
         int? GetMarker(char[] buffer)
         {
             int? index = null;
-            for (int i = 0; i < _inputText.Length - buffer.Length; i++)
+            for (int i = 0; i < _input.Text.Length - buffer.Length; i++)
             {
                 if (buffer.Distinct().Count() == buffer.Length)
                 {
@@ -64,17 +58,22 @@ public class Day6Benchmarks
                 }
 
                 for (int c = 0; c < buffer.Length; c++)
-                    buffer[c] = _inputText[i + c + 1];
+                    buffer[c] = _input.Text[i + c + 1];
             }
             return index;
         }
 
-        char[] buffer = _inputText.Take(14).ToArray();
+        char[] buffer = _input.Text.Take(14).ToArray();
         int? index = GetMarker(buffer);
         return index;
     }
 
-    [Benchmark]
+    #endregion
+
+    #region Caeden
+
+    [Benchmark(Baseline = Helpers.CaedenIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int Caeden_Part1()
     {
         const int messageLength = 4;
@@ -82,10 +81,12 @@ public class Day6Benchmarks
         var currentChar = 0;
         var bitfield = 0u;
         var i = 0;
-        Span<int> processing = stackalloc int[(int)_inputStream.Length];
+        Span<int> processing = stackalloc int[_input.Bytes.Length];
 
-        while ((currentChar = _inputStream.ReadByte()) > -1)
+        for (int z = 0; z < _input.Bytes.Length; z++)
         {
+            currentChar = _input.Bytes[z];
+
             if (currentChar > 'z') continue;
             processing[totalChars] = currentChar;
             totalChars++;
@@ -93,7 +94,7 @@ public class Day6Benchmarks
             {
                 bitfield = 0;
 
-                for (i = totalChars - messageLength; i < totalChars; i++) bitfield |= 1u << (processing[i] - 'a');
+                for (i = totalChars - messageLength; i < totalChars; i++) bitfield |= 1u << processing[i] - 'a';
 
                 if (System.Numerics.BitOperations.PopCount(bitfield) == messageLength) break;
             }
@@ -102,7 +103,8 @@ public class Day6Benchmarks
         return totalChars;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.CaedenIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public int Caeden_Part2()
     {
         const int messageLength = 14;
@@ -110,10 +112,12 @@ public class Day6Benchmarks
         var currentChar = 0;
         var bitfield = 0u;
         var i = 0;
-        Span<int> processing = stackalloc int[(int)_inputStream.Length];
+        Span<int> processing = stackalloc int[_input.Bytes.Length];
 
-        while ((currentChar = _inputStream.ReadByte()) > -1)
+        for (int z = 0; z < _input.Bytes.Length; z++)
         {
+            currentChar = _input.Bytes[z];
+
             if (currentChar > 'z') continue;
             processing[totalChars] = currentChar;
             totalChars++;
@@ -121,7 +125,7 @@ public class Day6Benchmarks
             {
                 bitfield = 0;
 
-                for (i = totalChars - messageLength; i < totalChars; i++) bitfield |= 1u << (processing[i] - 'a');
+                for (i = totalChars - messageLength; i < totalChars; i++) bitfield |= 1u << processing[i] - 'a';
 
                 if (System.Numerics.BitOperations.PopCount(bitfield) == messageLength) break;
             }
@@ -130,13 +134,19 @@ public class Day6Benchmarks
         return totalChars;
     }
 
-    [Benchmark]
+    #endregion
+
+    #region Eris
+
+    [Benchmark(Baseline = Helpers.ErisIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int Eris_Part1()
     {
         return Eris_Check(4);
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.ErisIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public int Eris_Part2()
     {
         return Eris_Check(14);
@@ -144,14 +154,13 @@ public class Day6Benchmarks
 
     private int Eris_Check(int markerSize)
     {
-        var dataStreamSpan = _inputText.AsSpan();
+        var dataStreamSpan = _input.Text.AsSpan();
 
         var i = 0;
-        var buffer = new char[markerSize];
         do
         {
-            dataStreamSpan.Slice(i, markerSize).CopyTo(buffer);
-            if (Eris_HasUniqueCharacters(buffer))
+            var bufferAsSpan = dataStreamSpan.Slice(i, markerSize);
+            if (Eris_HasUniqueCharacters(ref bufferAsSpan))
             {
                 break;
             }
@@ -162,7 +171,7 @@ public class Day6Benchmarks
         return i + markerSize;
     }
 
-    private static bool Eris_HasUniqueCharacters(char[] input)
+    private static bool Eris_HasUniqueCharacters(ref ReadOnlySpan<char> input)
     {
         for (var i = 0; i < input.Length; i++)
             for (var j = i + 1; j < input.Length; j++)
@@ -175,4 +184,24 @@ public class Day6Benchmarks
 
         return true;
     }
+
+    #endregion
+
+    #region Goobie
+    /*
+    [Benchmark(Baseline = Helpers.GoobieIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
+    public int Goobie_Part1()
+    {
+
+    }
+
+    [Benchmark(Baseline = Helpers.GoobieIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
+    public int Goobie_Part2()
+    {
+
+    }
+    */
+    #endregion
 }

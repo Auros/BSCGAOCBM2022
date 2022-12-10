@@ -1,42 +1,31 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 using System.Diagnostics;
-using System.Text;
 
-namespace BSCGAOCBM2022;
+namespace BSCGAOCBM2022.GroupA;
 
 [MemoryDiagnoser]
+[CategoriesColumn]
+[Config(typeof(CustomConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 public class Day7Benchmarks
 {
-    private string _inputText = null!;
-    private string[] _inputLines = null!;
-    private MemoryStream _inputStream = null!;
-    private IEnumerable<string> _inputEnumerable = null!;
+    private Input _input = null!;
 
     [GlobalSetup]
-    public void Setup()
-    {
-        _inputText = File.ReadAllText(@"Input\7.txt");
-        _inputLines = File.ReadAllLines(@"Input\7.txt");
-        _inputEnumerable = _inputLines.AsEnumerable();
-        _inputStream = new MemoryStream(Encoding.UTF8.GetBytes(_inputText));
-    }
+    public void Setup() => _input = Helpers.GetInput(7);
 
-    record class Auros_FSI(string Name, bool IsDirectory, List<Auros_FSI>? Children)
-    {
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public Auros_FSI Parent { get; set; } = null!;
+    #region Auros
 
-        public int Size { get; set; }
-    }
-
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.AurosIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int Auros_Part1()
     {
         Auros_FSI? root = null;
         Auros_FSI? current = null;
         List<Auros_FSI> allDirectories = new();
 
-        foreach (var line in _inputLines)
+        foreach (var line in _input.Lines)
             ReadInstruction(line);
 
         void ReadInstruction(string line)
@@ -108,14 +97,15 @@ public class Day7Benchmarks
         return sumOfSmallerDirectories;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.AurosIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public int? Auros_Part2()
     {
         Auros_FSI? root = null;
         Auros_FSI? current = null;
         List<Auros_FSI> allDirectories = new();
 
-        foreach (var line in _inputLines)
+        foreach (var line in _input.Lines)
             ReadInstruction(line);
 
         void ReadInstruction(string line)
@@ -191,27 +181,30 @@ public class Day7Benchmarks
         return directoryToDelete?.Size;
     }
 
-    record Caeden_DirInfo(string Name, Caeden_DirInfo? Parent)
+    record class Auros_FSI(string Name, bool IsDirectory, List<Auros_FSI>? Children)
     {
-        public long Size => ChildDirs.Sum(dir => dir.Size) + Files.Sum(file => file.Size);
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public Auros_FSI Parent { get; set; } = null!;
 
-        internal List<Caeden_DirInfo> ChildDirs = new();
-        internal List<Caeden_FileInfo> Files = new();
+        public int Size { get; set; }
     }
 
-    record Caeden_FileInfo(string Name, long Size);
+    #endregion
 
-    [Benchmark]
+    #region Caeden
+
+    [Benchmark(Baseline = Helpers.CaedenIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public long Caeden_Part1()
     {
         Caeden_DirInfo root = new("/", null);
         Caeden_DirInfo currentDir = root;
-        _inputStream.Position = 0;
-        using var input = new StreamReader(_inputStream);
 
         string? currentCommand = string.Empty;
-        while ((currentCommand = input.ReadLine()) != null)
+        for (int i = 0; i <_input.Lines.Length; i++)
         {
+            currentCommand = _input.Lines[i];
+
             // We're about to do some serious bullshit
             switch (currentCommand[0])
             {
@@ -250,17 +243,18 @@ public class Day7Benchmarks
         return sumOfSmallDirs;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.CaedenIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public long Caeden_Part2()
     {
         Caeden_DirInfo root = new("/", null);
         Caeden_DirInfo currentDir = root;
-        _inputStream.Position = 0;
-        using var input = new StreamReader(_inputStream, leaveOpen: true);
 
         string? currentCommand = string.Empty;
-        while ((currentCommand = input.ReadLine()) != null)
+        for (int i = 0; i < _input.Lines.Length; i++)
         {
+            currentCommand = _input.Lines[i];
+
             // We're about to do some serious bullshit
             switch (currentCommand[0])
             {
@@ -300,7 +294,22 @@ public class Day7Benchmarks
         return deletionSize;
     }
 
-    [Benchmark]
+    record Caeden_DirInfo(string Name, Caeden_DirInfo? Parent)
+    {
+        public long Size => ChildDirs.Sum(dir => dir.Size) + Files.Sum(file => file.Size);
+
+        internal List<Caeden_DirInfo> ChildDirs = new();
+        internal List<Caeden_FileInfo> Files = new();
+    }
+
+    record Caeden_FileInfo(string Name, long Size);
+
+    #endregion
+
+    #region Eris
+
+    [Benchmark(Baseline = Helpers.ErisIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public long Eris_Part1()
     {
         var root = Eris_BuildFileTree();
@@ -325,7 +334,8 @@ public class Day7Benchmarks
         return sum;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.ErisIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public long Eris_Part2()
     {
         var root = Eris_BuildFileTree();
@@ -352,7 +362,7 @@ public class Day7Benchmarks
 
     private Eris_FolderObject Eris_BuildFileTree()
     {
-        var commandLineOutput = _inputLines;
+        var commandLineOutput = _input.Lines;
         var index = 0;
         Eris_FolderObject? root = null;
         Eris_FolderObject? current = null;
@@ -435,23 +445,43 @@ public class Day7Benchmarks
 
     private static bool Eris_IsCommand(ref string line) => line[0] == '$';
 
-    private class Eris_FileObject : Eris_IFileSystemObject
+    private class Eris_FileObject : IEris_IFileSystemObject
     {
         public string Name { get; init; } = null!;
         public long Size { get; init; }
     }
 
-    private class Eris_FolderObject : Eris_IFileSystemObject
+    private class Eris_FolderObject : IEris_IFileSystemObject
     {
         public string Name { get; init; } = null!;
         public long Size => ChildObjects.Sum(x => x.Size);
         public Eris_FolderObject Parent { get; init; } = null!;
-        public List<Eris_IFileSystemObject> ChildObjects { get; } = new();
+        public List<IEris_IFileSystemObject> ChildObjects { get; } = new();
     }
 
-    private interface Eris_IFileSystemObject
+    private interface IEris_IFileSystemObject
     {
         string Name { get; init; }
         long Size { get; }
     }
+
+    #endregion
+
+    #region Goobie
+    /*
+    [Benchmark(Baseline = Helpers.GoobieIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
+    public int Goobie_Part1()
+    {
+
+    }
+
+    [Benchmark(Baseline = Helpers.GoobieIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
+    public int Goobie_Part2()
+    {
+
+    }
+    */
+    #endregion
 }

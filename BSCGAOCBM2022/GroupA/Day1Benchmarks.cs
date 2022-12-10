@@ -1,28 +1,28 @@
 ﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
 
-namespace BSCGAOCBM2022;
+namespace BSCGAOCBM2022.GroupA;
 
 [MemoryDiagnoser]
+[CategoriesColumn]
+[Config(typeof(CustomConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 public class Day1Benchmarks
 {
-    private string _inputText = null!;
-    private string[] _inputLines = null!;
-    private IEnumerable<string> _inputEnumerable = null!;
+    private Input _input = null!;
 
     [GlobalSetup]
-    public void Setup()
-    {
-        _inputText = File.ReadAllText(@"Input\1.txt");
-        _inputLines = File.ReadAllLines(@"Input\1.txt");
-        _inputEnumerable = _inputLines.AsEnumerable();
-    }
+    public void Setup() => _input = Helpers.GetInput(1);
 
-    [Benchmark]
+    #region Auros
+
+    [Benchmark(Baseline = Helpers.AurosIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int? Auros_Part1()
     {
-        List<Auros.Day1_Elf> elves = new();
-        Auros.Day1_Elf? currentElf = null;
-        foreach (var line in _inputLines)
+        List<Auros_Elf> elves = new();
+        Auros_Elf? currentElf = null;
+        foreach (var line in _input.Lines)
         {
             // Once we reach the end of a grouping of calories,
             // unassign the current elf. The ending is represented
@@ -37,7 +37,7 @@ public class Day1Benchmarks
             // an elf assign, we assign it and add it to the collection of elves.
             if (currentElf is null)
             {
-                currentElf = new Auros.Day1_Elf();
+                currentElf = new Auros_Elf();
                 elves.Add(currentElf);
             }
 
@@ -49,7 +49,7 @@ public class Day1Benchmarks
         }
 
         // Find the elf with the most calories
-        Auros.Day1_Elf? mostCaloricElf = null;
+        Auros_Elf? mostCaloricElf = null;
         for (int i = 0; i < elves.Count; i++)
         {
             var elf = elves[i];
@@ -60,12 +60,13 @@ public class Day1Benchmarks
         return mostCaloricElf?.Calories;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.AurosIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public int Auros_Part2()
     {
-        List<Auros.Day1_Elf> elves = new();
-        Auros.Day1_Elf? currentElf = null;
-        foreach (var line in _inputLines)
+        List<Auros_Elf> elves = new();
+        Auros_Elf? currentElf = null;
+        foreach (var line in _input.Lines)
         {
             // Once we reach the end of a grouping of calories,
             // unassign the current elf. The ending is represented
@@ -80,7 +81,7 @@ public class Day1Benchmarks
             // an elf assign, we assign it and add it to the collection of elves.
             if (currentElf is null)
             {
-                currentElf = new Auros.Day1_Elf();
+                currentElf = new Auros_Elf();
                 elves.Add(currentElf);
             }
 
@@ -104,10 +105,22 @@ public class Day1Benchmarks
         return topCalorieCount;
     }
 
-    [Benchmark]
+    internal class Auros_Elf
+    {
+        public int Calories { get; private set; }
+
+        public void AddCalories(int calories) => Calories += calories;
+    }
+
+    #endregion
+
+    #region Caeden
+
+    [Benchmark(Baseline = Helpers.CaedenIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int Caeden_Part1()
     {
-        var totalCaloriesPerElf = _inputText
+        var totalCaloriesPerElf = _input.Text
             .Split(Environment.NewLine + Environment.NewLine)
             .Select(it => it.Split(Environment.NewLine).Where(it => !string.IsNullOrWhiteSpace(it)))
             .Select(it => it.Select(str => int.Parse(str)).Sum())
@@ -117,10 +130,11 @@ public class Day1Benchmarks
         return totalCaloriesPerElf.Max();
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.CaedenIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public int Caeden_Part2()
     {
-        var totalCaloriesPerElf = _inputText
+        var totalCaloriesPerElf = _input.Text
             .Split(Environment.NewLine + Environment.NewLine)
             .Select(it => it.Split(Environment.NewLine).Where(it => !string.IsNullOrWhiteSpace(it)))
             .Select(it => it.Select(str => int.Parse(str)).Sum())
@@ -130,13 +144,19 @@ public class Day1Benchmarks
         return totalCaloriesPerElf.Take(3).Sum();
     }
 
-    [Benchmark]
+    #endregion
+
+    #region Eris
+
+    [Benchmark(Baseline = Helpers.ErisIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
     public uint Eris_Part1()
     {
         return Eris_ParseCaloriesData().Max();
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = Helpers.ErisIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
     public long Eris_Part2()
     {
         return Eris_ParseCaloriesData().OrderDescending().Take(3).Sum(x => x);
@@ -145,7 +165,7 @@ public class Day1Benchmarks
     private IEnumerable<uint> Eris_ParseCaloriesData()
     {
         var currentCalories = 0u;
-        foreach (var calorieRaw in _inputEnumerable)
+        foreach (var calorieRaw in _input.Enumerable)
         {
             if (string.IsNullOrWhiteSpace(calorieRaw))
             {
@@ -158,4 +178,73 @@ public class Day1Benchmarks
             }
         }
     }
+
+    #endregion
+
+    #region Goobie
+
+    [Benchmark(Baseline = Helpers.GoobieIsBaseline)]
+    [BenchmarkCategory(Helpers.Part1)]
+    public int Goobie_Part1()
+    {
+        var elves = new List<Goobie_Elf>();
+
+        Goobie_Elf elf = new();
+        foreach (var line in _input.Lines)
+        {
+            if (line == "")
+            {
+                elves.Add(elf);
+                elf = new();
+                continue;
+            }
+
+            var meow = int.Parse(line);
+            elf.foods.Add(meow);
+        }
+
+        elves.Sort((a, b) =>
+        {
+            return b.Calories() - a.Calories();
+        });
+
+        return elves.First().Calories();
+    }
+
+    [Benchmark(Baseline = Helpers.GoobieIsBaseline)]
+    [BenchmarkCategory(Helpers.Part2)]
+    public int Goobie_Part2()
+    {
+        var elves = new List<Goobie_Elf>();
+
+        Goobie_Elf elf = new();
+        foreach (var line in _input.Lines)
+        {
+            if (line == "")
+            {
+                elves.Add(elf);
+                elf = new();
+                continue;
+            }
+
+            var meow = int.Parse(line);
+            elf.foods.Add(meow);
+        }
+
+        elves.Sort((a, b) =>
+        {
+            return b.Calories() - a.Calories();
+        });
+
+        return elves[0].Calories() + elves[1].Calories() + elves[2].Calories();
+    }
+
+    public class Goobie_Elf
+    {
+        public List<int> foods { get; set; } = new List<int>();
+
+        public int Calories() => foods.Aggregate((a, b) => a + b);
+    }
+
+    #endregion
 }
