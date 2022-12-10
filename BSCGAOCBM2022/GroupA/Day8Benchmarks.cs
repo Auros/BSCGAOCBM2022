@@ -336,7 +336,7 @@ public class Day8Benchmarks
     #region Eris Solution 2
 
     [Benchmark(Baseline = Helpers.ErisIsBaseline)]
-    [BenchmarkCategory(Helpers.Part2)]
+    [BenchmarkCategory(Helpers.Part1)]
     public int Eris_Part1_Sol2()
     {
         var (treeHeightMap, height, width) = Eris_ParseTreeHeightMap_Sol2();

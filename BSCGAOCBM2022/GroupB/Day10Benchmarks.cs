@@ -8,7 +8,7 @@ namespace BSCGAOCBM2022.GroupB;
 [CategoriesColumn]
 [Config(typeof(CustomConfig))]
 [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
-public class Day10enchmarks
+public class Day10Benchmarks
 {
     private Input _input = null!;
 

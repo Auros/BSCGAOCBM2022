@@ -1,4 +1,4 @@
 ﻿using BenchmarkDotNet.Running;
-using BSCGAOCBM2022.GroupA;
+using BSCGAOCBM2022.GroupB;
 
-BenchmarkRunner.Run<Day5Benchmarks>();
+BenchmarkRunner.Run<Day10Benchmarks>();
