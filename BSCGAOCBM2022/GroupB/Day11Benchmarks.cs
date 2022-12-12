@@ -84,6 +84,8 @@ public class Day11Benchmarks
         int nextItem = 0;
         for (int i = 0; i < monkeys.Length; i++)
         {
+            ref var monkey = ref monkeys[i];
+
             var offset = i * 7;
             var startingItemsLine = input[++offset];
             var operationLine = input[++offset];
@@ -106,13 +108,13 @@ public class Day11Benchmarks
                 var opSpan = operationLine.AsSpan(AUROS_OPERATION_LOCATION);
                 opValue = Auros_FastParseDigits(ref opSpan);
             }
-            monkeys[i].Operation = op == '*' ? opValue * -1 : opValue;
+            monkey.Operation = op == '*' ? opValue * -1 : opValue;
 
             var testSpan = testLine.AsSpan(AUROS_TEST_OFFSET);
-            monkeys[i].Test = Auros_FastParseDigits(ref testSpan);
+            monkey.Test = Auros_FastParseDigits(ref testSpan);
 
-            monkeys[i].True = Auros_FastParseSingleDigit(trueLine[AUROS_TRUE_LOCATION]);
-            monkeys[i].False = Auros_FastParseSingleDigit(falseLine[AUROS_FALSE_LOCATION]);
+            monkey.True = Auros_FastParseSingleDigit(trueLine[AUROS_TRUE_LOCATION]);
+            monkey.False = Auros_FastParseSingleDigit(falseLine[AUROS_FALSE_LOCATION]);
         }
     }
 
@@ -126,7 +128,7 @@ public class Day11Benchmarks
         {
             for (int c = 0; c < monkeys.Length; c++)
             {
-                var monkey = monkeys[c];
+                ref var monkey = ref monkeys[c];
                 for (int q = 0; q < items.Length && monkey.Holding is not 0; q++)
                 {
                     // If the item we're looking for is not 
@@ -134,7 +136,7 @@ public class Day11Benchmarks
                         continue;
 
                     // Calculate the new worry level
-                    var item = items[q];
+                    ref var item = ref items[q];
 
                     item = monkey.Calculate(item) / calmingEffect % lcm;
 
@@ -144,8 +146,6 @@ public class Day11Benchmarks
                     itemHolders[q] = targetMonkeyIndex;
                     monkey.Holding--;
                     monkey.Inspections++;
-                    monkeys[c] = monkey;
-                    items[q] = item;
                 }
             }
         }
@@ -366,10 +366,18 @@ public class Day11Benchmarks
     #endregion
 
     #region Eris
-    
+
     [Benchmark]
     [BenchmarkCategory(Helpers.Part1)]
-    public int Eris_Part1()
+    public long Eris_Part1() => SolveInternal(20, 3);
+
+    [Benchmark]
+    [BenchmarkCategory(Helpers.Part2)]
+    public long Eris_Part2() => SolveInternal(10_000, 1);
+    
+    private const int ERIS_MONKEY_DESCRIPTORS_LINE_COUNT = 7;
+
+    private long SolveInternal(int rounds, int calmingEffectFactor)
     {
         ReadOnlySpan<string> monkeyDescriptorsRaw = _input.Lines;
 
@@ -378,25 +386,15 @@ public class Day11Benchmarks
         Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfo = stackalloc Eris_MonkeyRealTimeInformation[monkeyCount];
 
         var itemCount = Eris_CalculateItemStoofs(monkeyDescriptorsRaw);
-        Span<int> itemWorryLevels = stackalloc int[itemCount];
+        Span<long> itemWorryLevels = stackalloc long[itemCount];
         Span<int> monkeyItemHolder = stackalloc int[itemCount];
 
         Eris_ParseInput(monkeyDescriptorsRaw, ref monkeyDescriptors, ref monkeyRealTimeInfo, ref itemWorryLevels, ref monkeyItemHolder);
 
-        Eris_DoMonkeyStoofs(ref monkeyDescriptors, ref monkeyRealTimeInfo, ref itemWorryLevels, ref monkeyItemHolder);
+        Eris_DoMonkeyStoofs(ref monkeyDescriptors, ref monkeyRealTimeInfo, ref itemWorryLevels, ref monkeyItemHolder, rounds, calmingEffectFactor);
 
         return Eris_Multiply2LargestNumbers(ref monkeyRealTimeInfo);
     }
-    /*
-    [Benchmark]
-    [BenchmarkCategory(Helpers.Part2)]
-    public int Eris_Part2()
-    {
-
-    }
-    */
-
-    private const int ERIS_MONKEY_DESCRIPTORS_LINE_COUNT = 7;
 
     private static int Eris_CalculateItemStoofs(ReadOnlySpan<string> monkeyDescriptorsRaw)
     {
@@ -412,7 +410,7 @@ public class Day11Benchmarks
     private static void Eris_ParseInput(ReadOnlySpan<string> monkeyDescriptorsRaw,
         ref Span<Eris_MonkeyDescriptor> monkeyDescriptors,
         ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfoDescriptors,
-        ref Span<int> itemWorryLevels,
+        ref Span<long> itemWorryLevels,
         ref Span<int> monkeyItemHolder)
     {
         var rawLineIndex = 0;
@@ -465,10 +463,18 @@ public class Day11Benchmarks
 
     private static void Eris_DoMonkeyStoofs(ref Span<Eris_MonkeyDescriptor> monkeyDescriptors,
         ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfoDescriptors,
-        ref Span<int> itemWorryLevels,
-        ref Span<int> monkeyItemHolderInfos)
+        ref Span<long> itemWorryLevels,
+        ref Span<int> monkeyItemHolderInfos,
+        int rounds,
+        int calmingEffectFactor)
     {
-        for (var round = 0; round < 20; round++)
+        var largestCommonMultiple = 1;
+        for (var i = 0; i < monkeyDescriptors.Length; i++)
+        {
+            largestCommonMultiple *= monkeyDescriptors[i].TestOperand;
+        }
+
+        for (var round = 0; round < rounds; round++)
         {
             for (var monkeyIndex = 0; monkeyIndex < monkeyDescriptors.Length; monkeyIndex++)
             {
@@ -497,7 +503,14 @@ public class Day11Benchmarks
                         _ => throw new UnreachableException("Bonk!")
                     };
 
-                    itemWorryLevel /= 3;
+                    if (calmingEffectFactor > 1)
+                    {
+                        itemWorryLevel /= calmingEffectFactor;
+                    }
+                    else
+                    {
+                        itemWorryLevel %= largestCommonMultiple;
+                    }
 
                     monkeyItemHolder = itemWorryLevel % monkeyDescriptor.TestOperand == 0
                         ? monkeyDescriptor.TrueTargetMonkey
@@ -512,7 +525,7 @@ public class Day11Benchmarks
         }
     }
 
-    private static int Eris_Multiply2LargestNumbers(ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfos)
+    private static long Eris_Multiply2LargestNumbers(ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfos)
     {
         var largest = 0;
         var secondLargest = 0;
@@ -531,7 +544,7 @@ public class Day11Benchmarks
             }
         }
 
-        return largest * secondLargest;
+        return (long)largest * secondLargest;
     }
 
     private static int Eris_SpecializedCaedenIntParser(ref ReadOnlySpan<char> span)
