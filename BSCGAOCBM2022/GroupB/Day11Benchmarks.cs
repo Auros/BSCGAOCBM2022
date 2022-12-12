@@ -366,14 +366,28 @@ public class Day11Benchmarks
     #endregion
 
     #region Eris
-    /*
+    
     [Benchmark]
     [BenchmarkCategory(Helpers.Part1)]
     public int Eris_Part1()
     {
+        ReadOnlySpan<string> monkeyDescriptorsRaw = _input.Lines;
 
+        var monkeyCount = (monkeyDescriptorsRaw.Length + 1) / ERIS_MONKEY_DESCRIPTORS_LINE_COUNT;
+        Span<Eris_MonkeyDescriptor> monkeyDescriptors = stackalloc Eris_MonkeyDescriptor[monkeyCount];
+        Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfo = stackalloc Eris_MonkeyRealTimeInformation[monkeyCount];
+
+        var itemCount = Eris_CalculateItemStoofs(monkeyDescriptorsRaw);
+        Span<int> itemWorryLevels = stackalloc int[itemCount];
+        Span<int> monkeyItemHolder = stackalloc int[itemCount];
+
+        Eris_ParseInput(monkeyDescriptorsRaw, ref monkeyDescriptors, ref monkeyRealTimeInfo, ref itemWorryLevels, ref monkeyItemHolder);
+
+        Eris_DoMonkeyStoofs(ref monkeyDescriptors, ref monkeyRealTimeInfo, ref itemWorryLevels, ref monkeyItemHolder);
+
+        return Eris_Multiply2LargestNumbers(ref monkeyRealTimeInfo);
     }
-
+    /*
     [Benchmark]
     [BenchmarkCategory(Helpers.Part2)]
     public int Eris_Part2()
@@ -381,6 +395,189 @@ public class Day11Benchmarks
 
     }
     */
+
+    private const int ERIS_MONKEY_DESCRIPTORS_LINE_COUNT = 7;
+
+    private static int Eris_CalculateItemStoofs(ReadOnlySpan<string> monkeyDescriptorsRaw)
+    {
+        var totalItemCount = 0;
+        for (var itemsIndex = 1; itemsIndex < monkeyDescriptorsRaw.Length; itemsIndex += ERIS_MONKEY_DESCRIPTORS_LINE_COUNT)
+        {
+            totalItemCount += (monkeyDescriptorsRaw[itemsIndex].Length - 18 + 2) / 4;
+        }
+
+        return totalItemCount;
+    }
+
+    private static void Eris_ParseInput(ReadOnlySpan<string> monkeyDescriptorsRaw,
+        ref Span<Eris_MonkeyDescriptor> monkeyDescriptors,
+        ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfoDescriptors,
+        ref Span<int> itemWorryLevels,
+        ref Span<int> monkeyItemHolder)
+    {
+        var rawLineIndex = 0;
+        var itemFillIndex = 0;
+        do
+        {
+            var monkeyId = Eris_SingleCharIntParser(monkeyDescriptorsRaw[rawLineIndex++][7]);
+
+            var startingItemsDescriptorSpan = monkeyDescriptorsRaw[rawLineIndex++].AsSpan()[18..];
+            ref var monkeyRealTimeInfo = ref monkeyRealTimeInfoDescriptors[monkeyId];
+            for (var i = 0; i < startingItemsDescriptorSpan.Length; i += 4)
+            {
+                itemWorryLevels[itemFillIndex] = Eris_DualCharIntParser(startingItemsDescriptorSpan[i], startingItemsDescriptorSpan[i + 1]);
+                monkeyItemHolder[itemFillIndex] = monkeyId;
+
+                monkeyRealTimeInfo.HoldCount++;
+                itemFillIndex++;
+            }
+
+            var operationDescriptorSpan = monkeyDescriptorsRaw[rawLineIndex++].AsSpan()[23..];
+            var monkeyOperation = operationDescriptorSpan[0] switch
+            {
+                '+' => Eris_Operation.Add,
+                '*' => Eris_Operation.Multiply,
+                _ => throw new UnreachableException("Bonk!")
+            };
+
+            var monkeyOperand = 0;
+            if (operationDescriptorSpan[2] == 'o')
+            {
+                monkeyOperation = Eris_Operation.Squared;
+            }
+            else
+            {
+                var monkeyOperandDescriptorSpan = operationDescriptorSpan[2..];
+                monkeyOperand = Eris_SpecializedCaedenIntParser(ref monkeyOperandDescriptorSpan);
+            }
+
+            var testOperandSpan = monkeyDescriptorsRaw[rawLineIndex++].AsSpan()[21..];
+            var monkeyTestOperand = Eris_SpecializedCaedenIntParser(ref testOperandSpan);
+
+            var trueMonkeyTarget = Eris_SingleCharIntParser(monkeyDescriptorsRaw[rawLineIndex++][29]);
+            var falseMonkeyTarget = Eris_SingleCharIntParser(monkeyDescriptorsRaw[rawLineIndex++][30]);
+
+            monkeyDescriptors[monkeyId] = new Eris_MonkeyDescriptor(monkeyOperation, monkeyOperand, monkeyTestOperand, trueMonkeyTarget, falseMonkeyTarget);
+
+            rawLineIndex++;
+        } while (rawLineIndex < monkeyDescriptorsRaw.Length);
+    }
+
+    private static void Eris_DoMonkeyStoofs(ref Span<Eris_MonkeyDescriptor> monkeyDescriptors,
+        ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfoDescriptors,
+        ref Span<int> itemWorryLevels,
+        ref Span<int> monkeyItemHolderInfos)
+    {
+        for (var round = 0; round < 20; round++)
+        {
+            for (var monkeyIndex = 0; monkeyIndex < monkeyDescriptors.Length; monkeyIndex++)
+            {
+                ref var monkeyRealTimeInfo = ref monkeyRealTimeInfoDescriptors[monkeyIndex];
+                if (monkeyRealTimeInfo.HoldCount == 0)
+                {
+                    continue;
+                }
+
+                ref var monkeyDescriptor = ref monkeyDescriptors[monkeyIndex];
+
+                for (var monkeyItemHolderIndex = 0; monkeyItemHolderIndex < monkeyItemHolderInfos.Length; monkeyItemHolderIndex++)
+                {
+                    ref var monkeyItemHolder = ref monkeyItemHolderInfos[monkeyItemHolderIndex];
+                    if (monkeyItemHolder != monkeyIndex)
+                    {
+                        continue;
+                    }
+
+                    ref var itemWorryLevel = ref itemWorryLevels[monkeyItemHolderIndex];
+                    itemWorryLevel = monkeyDescriptor.Operation switch
+                    {
+                        Eris_Operation.Add => itemWorryLevel + monkeyDescriptor.Operand,
+                        Eris_Operation.Multiply => itemWorryLevel * monkeyDescriptor.Operand,
+                        Eris_Operation.Squared => itemWorryLevel * itemWorryLevel,
+                        _ => throw new UnreachableException("Bonk!")
+                    };
+
+                    itemWorryLevel /= 3;
+
+                    monkeyItemHolder = itemWorryLevel % monkeyDescriptor.TestOperand == 0
+                        ? monkeyDescriptor.TrueTargetMonkey
+                        : monkeyDescriptor.FalseTargetMonkey;
+
+                    monkeyRealTimeInfoDescriptors[monkeyItemHolder].HoldCount++;
+                    monkeyRealTimeInfo.HoldCount--;
+
+                    monkeyRealTimeInfo.InspectedCount++;
+                }
+            }
+        }
+    }
+
+    private static int Eris_Multiply2LargestNumbers(ref Span<Eris_MonkeyRealTimeInformation> monkeyRealTimeInfos)
+    {
+        var largest = 0;
+        var secondLargest = 0;
+
+        foreach (var monkeyRealTimeInfo in monkeyRealTimeInfos)
+        {
+            var inspectionCount = monkeyRealTimeInfo.InspectedCount;
+            if (inspectionCount > largest)
+            {
+                secondLargest = largest;
+                largest = inspectionCount;
+            }
+            else if (inspectionCount > secondLargest)
+            {
+                secondLargest = inspectionCount;
+            }
+        }
+
+        return largest * secondLargest;
+    }
+
+    private static int Eris_SpecializedCaedenIntParser(ref ReadOnlySpan<char> span)
+    {
+        return span.Length == 2
+            ? Eris_DualCharIntParser(span[0], span[1])
+            : Eris_SingleCharIntParser(span[0]);
+    }
+
+    private static int Eris_DualCharIntParser(char charDigit1, char charDigit2) => Eris_SingleCharIntParser(charDigit1) * 10 + Eris_SingleCharIntParser(charDigit2);
+    private static int Eris_SingleCharIntParser(char charDigit) => charDigit - '0';
+
+    // Split Monkey information into 2 structs to prevent excessive defensive copying of the struct when passing it around
+    private readonly struct Eris_MonkeyDescriptor
+    {
+        public readonly Eris_Operation Operation;
+        public readonly int Operand;
+
+        public readonly int TestOperand;
+
+        public readonly int TrueTargetMonkey;
+        public readonly int FalseTargetMonkey;
+
+        public Eris_MonkeyDescriptor(Eris_Operation operation, int operand, int testOperand, int trueTargetMonkey, int falseTargetMonkey)
+        {
+            Operation = operation;
+            Operand = operand;
+            TestOperand = testOperand;
+            TrueTargetMonkey = trueTargetMonkey;
+            FalseTargetMonkey = falseTargetMonkey;
+        }
+    }
+
+    private struct Eris_MonkeyRealTimeInformation
+    {
+        public int InspectedCount { get; set; }
+        public int HoldCount { get; set; }
+    }
+
+    private enum Eris_Operation
+    {
+        Add,
+        Multiply,
+        Squared
+    }
+
     #endregion
 
     #region Goobie
