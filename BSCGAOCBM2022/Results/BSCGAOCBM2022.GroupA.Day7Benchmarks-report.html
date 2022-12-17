@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BSCGAOCBM2022.GroupA.Day7Benchmarks-20221217-030905</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.2, OS=Windows 10 (10.0.19044.2364/21H2/November2021Update)
+AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
+.NET SDK=7.0.100
+  [Host]     : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>Mean</th><th>Error</th><th> Ratio</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Auros_Part1</td><td>80.40 &mu;s</td><td>0.341 &mu;s</td><td>baseline</td><td>19.4092</td><td>3.4180</td><td>159.05 KB</td><td></td>
+</tr><tr><td>Caeden_Part1</td><td>116.41 &mu;s</td><td>0.351 &mu;s</td><td>1.45x slower</td><td>22.4609</td><td>4.3945</td><td>183.68 KB</td><td>1.15x more</td>
+</tr><tr><td>Eris_Part1</td><td>173.27 &mu;s</td><td>0.844 &mu;s</td><td>2.16x slower</td><td>29.5410</td><td>4.8828</td><td>241.35 KB</td><td>1.52x more</td>
+</tr><tr><td>Auros_Part2</td><td>80.49 &mu;s</td><td>0.275 &mu;s</td><td>baseline</td><td>19.4092</td><td>3.5400</td><td>159.26 KB</td><td></td>
+</tr><tr><td>Caeden_Part2</td><td>130.41 &mu;s</td><td>0.768 &mu;s</td><td>1.62x slower</td><td>24.1699</td><td>4.6387</td><td>198.15 KB</td><td>1.24x more</td>
+</tr><tr><td>Eris_Part2</td><td>203.51 &mu;s</td><td>0.436 &mu;s</td><td>2.53x slower</td><td>32.4707</td><td>5.3711</td><td>266.8 KB</td><td>1.68x more</td>
+</tr></tbody></table>
+</body>
+</html>

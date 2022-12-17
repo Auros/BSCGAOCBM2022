@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BSCGAOCBM2022.GroupA.Day4Benchmarks-20221217-030352</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.2, OS=Windows 10 (10.0.19044.2364/21H2/November2021Update)
+AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
+.NET SDK=7.0.100
+  [Host]     : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>Mean</th><th>Error</th><th>  Ratio</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Auros_Part1</td><td>2,997.2 &mu;s</td><td>29.66 &mu;s</td><td>baseline</td><td>132.8125</td><td>-</td><td>1105.01 KB</td><td></td>
+</tr><tr><td>Caeden_Part1</td><td>412.7 &mu;s</td><td>1.45 &mu;s</td><td>7.26x faster</td><td>116.6992</td><td>22.4609</td><td>954.76 KB</td><td>1.16x less</td>
+</tr><tr><td>Eris_Part1</td><td>533.8 &mu;s</td><td>1.56 &mu;s</td><td>5.62x faster</td><td>91.7969</td><td>-</td><td>753.18 KB</td><td>1.47x less</td>
+</tr><tr><td>Goobie_Part1</td><td>148.7 &mu;s</td><td>1.01 &mu;s</td><td>20.14x faster</td><td>36.6211</td><td>-</td><td>299.9 KB</td><td>3.68x less</td>
+</tr><tr><td>Auros_Part2</td><td>576.0 &mu;s</td><td>6.04 &mu;s</td><td>baseline</td><td>60.5469</td><td>-</td><td>497.86 KB</td><td></td>
+</tr><tr><td>Caeden_Part2</td><td>1,515.8 &mu;s</td><td>8.11 &mu;s</td><td>2.63x slower</td><td>199.2188</td><td>39.0625</td><td>1629.96 KB</td><td>3.27x more</td>
+</tr><tr><td>Eris_Part2</td><td>517.2 &mu;s</td><td>2.34 &mu;s</td><td>1.11x faster</td><td>91.7969</td><td>-</td><td>753.18 KB</td><td>1.51x more</td>
+</tr><tr><td>Goobie_Part2</td><td>147.1 &mu;s</td><td>0.79 &mu;s</td><td>3.92x faster</td><td>36.6211</td><td>-</td><td>299.9 KB</td><td>1.66x less</td>
+</tr></tbody></table>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BSCGAOCBM2022.GroupA.Day8Benchmarks-20221217-031053</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.2, OS=Windows 10 (10.0.19044.2364/21H2/November2021Update)
+AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
+.NET SDK=7.0.100
+  [Host]     : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>   Method</th><th>  Mean</th><th>Error</th><th>   Ratio</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Auros_Part1</td><td>89.04 &mu;s</td><td>0.460 &mu;s</td><td>baseline</td><td>8.6670</td><td>1.4648</td><td>73152 B</td><td></td>
+</tr><tr><td>Caeden_Part1</td><td>12,159.41 &mu;s</td><td>30.379 &mu;s</td><td>136.57x slower</td><td>484.3750</td><td>-</td><td>4157430 B</td><td>56.83x more</td>
+</tr><tr><td>Eris_Part1_Sol1</td><td>2,842.52 &mu;s</td><td>9.461 &mu;s</td><td>31.90x slower</td><td>644.5313</td><td>89.8438</td><td>5392666 B</td><td>73.72x more</td>
+</tr><tr><td>Eris_Part1_Sol2</td><td>393.08 &mu;s</td><td>1.788 &mu;s</td><td>4.41x slower</td><td>3.9063</td><td>-</td><td>35640 B</td><td>2.05x less</td>
+</tr><tr><td>Auros_Part2</td><td>482.20 &mu;s</td><td>1.313 &mu;s</td><td>baseline</td><td>-</td><td>-</td><td>-</td><td>NA</td>
+</tr><tr><td>Caeden_Part2</td><td>4,895.41 &mu;s</td><td>13.365 &mu;s</td><td>10.15x slower</td><td>960.9375</td><td>-</td><td>8059571 B</td><td>NA</td>
+</tr><tr><td>Eris_Part2_Sol1</td><td>2,633.59 &mu;s</td><td>8.542 &mu;s</td><td>5.46x slower</td><td>644.5313</td><td>89.8438</td><td>5392746 B</td><td>NA</td>
+</tr><tr><td>Eris_Part2_Sol2</td><td>428.09 &mu;s</td><td>3.663 &mu;s</td><td>1.13x faster</td><td>3.9063</td><td>-</td><td>35640 B</td><td>NA</td>
+</tr></tbody></table>
+</body>
+</html>
