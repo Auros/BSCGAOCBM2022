@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>BSCGAOCBM2022.GroupA.Day5Benchmarks-20221217-030610</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet=v0.13.2, OS=Windows 10 (10.0.19044.2364/21H2/November2021Update)
+AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
+.NET SDK=7.0.100
+  [Host]     : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+  DefaultJob : .NET 7.0.0 (7.0.22.51805), X64 RyuJIT AVX2
+</code></pre>
+<pre><code></code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>Mean</th><th>Error</th><th> Ratio</th><th>Gen0</th><th>Gen1</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Auros_Part1</td><td>443.39 &mu;s</td><td>1.605 &mu;s</td><td>baseline</td><td>15.6250</td><td>-</td><td>128.44 KB</td><td></td>
+</tr><tr><td>Eris_Part1</td><td>81.91 &mu;s</td><td>0.351 &mu;s</td><td>5.41x faster</td><td>16.8457</td><td>0.3662</td><td>138.03 KB</td><td>1.07x more</td>
+</tr><tr><td>Auros_Part2</td><td>522.62 &mu;s</td><td>1.591 &mu;s</td><td>baseline</td><td>25.3906</td><td>-</td><td>209.89 KB</td><td></td>
+</tr><tr><td>Eris_Part2</td><td>91.47 &mu;s</td><td>0.668 &mu;s</td><td>5.71x faster</td><td>21.1182</td><td>0.4883</td><td>172.57 KB</td><td>1.22x less</td>
+</tr></tbody></table>
+</body>
+</html>
